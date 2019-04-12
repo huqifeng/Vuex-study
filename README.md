@@ -101,7 +101,7 @@ computed:{
 
 ---
 
-## 2、Getter
+## 4、Getter
 有时候在store中的state中派生出一些状态，例如对列表进行过滤计数：
 ```js
 computed:{
@@ -117,3 +117,63 @@ computed:{
     */
 }
 ```
+但是如果多个组件中需要使用到这个属性的话，就需要不断的复制这个函数，或者抽取到一个公用的文件中去不应用，这样就不是很理想。
+
+Vuex提供了在store中定义“getter”，就像计算属性一样，getter的返回值会根据它的依赖被缓存起来，而且自后当它依赖的值发生改变的时候才会被重新计算。
+
+Getter接受state作为第一个参数
+```js
+const store = new Vuex.stroe({
+  state:{
+    todes:[
+      {id:1,text:'...',done:true},
+      {id:2,text:'...',done:true},
+      {id:3,text:'...',done:false},
+      {id:4,text:'...',done:false},
+    ]
+  },
+  getters:{
+    doneTodes:state=>{
+      return state.todes.filter(tode => tode.done)
+    }
+  }
+})
+```
+### 4.1、getter通过属性访问
+getter会暴露为store.getters对象，你可以一苏醒的形式访问这些值
+```js
+store.getters.doneTodes //返回的是符合filter的数组
+```
+getter也可以接受其他getter作为第二个参数
+```js
+getters:{
+  //...
+  doneTodesCount:(state,getters)=>{
+    return getters.doneTodes.length
+  }
+}
+
+store.getters.doneTodesCount  // -> 1
+
+//我们可以很泳衣的在任何组件中使用
+computed:{
+  doneTodesCunt(){
+    return this.$store.getters.doneTodesCount
+  }
+}
+```
+注意，getter 在通过属性访问时是作为 Vue 的响应式系统的一部分缓存其中的。
+
+### 4.2、getter通过方法访问
+你也可以通过躺getter返回一个函数，来实现给getter传参。在你对store里的数组进行查询时非常有用。
+```js
+getters:{
+  getterTodoById:(state)=>(id)=>{
+    return state.todes.find(todo=>todo.id === id)
+  }
+}
+
+store.getters.getYodoById(2)  // -> {id:2,text:'...',done:false}
+```
+getter在
+
