@@ -164,7 +164,7 @@ computed:{
 ```
 注意，getter 在通过属性访问时是作为 Vue 的响应式系统的一部分缓存其中的。
 
-### 4.2、getter通过方法访问
+### 4.2、getter通过方法访问
 你也可以通过躺getter返回一个函数，来实现给getter传参。在你对store里的数组进行查询时非常有用。
 ```js
 getters:{
@@ -175,5 +175,91 @@ getters:{
 
 store.getters.getYodoById(2)  // -> {id:2,text:'...',done:false}
 ```
-getter在
-
+注意 getter在通过方法访问的时候，每次都会进行调用，而不会缓存结果
+
+### 4.3、mapGetters 辅助函数
+mapGetter 辅助韩式仅仅是通过store中的getter映射到局部计算属性中
+```js
+import {mapGetters} from 'vuex'
+
+export default{
+  //...
+  computed:{
+    //使用对象展开运算符将getter混入 computed对象中
+    ...mapGetters([
+      'doneTodesCount',
+      'anotherGetter'
+    ]),
+    //如果想将getter属性另外取一个名字，使用对象形式
+    ...mapGetters({
+      doneCount:'doneTodesCount'
+    })
+
+  }
+}
+```
+
+## 5、Mutation
+更改Vuex的store中的状态的唯一的方法就是提交mutation。Vuex中的mutatuin非常类似于时间：每个mutation都有一个字符串的时间类型和一个回调函数，这个回调函数就是我能实际进行状态改进的地方，并且他会接受state作为第一个参数。
+```js
+const store = new Vuex.Store({
+  state:{
+    count:1
+  },
+  mutations:{
+    increment(state){
+      state.count++
+    }
+  }
+})
+```
+但是不能直接调用mutatuin handler，需要以相应的type调用store.commit方法：
+```js
+store.commit('increment')
+```
+### 5.1、提交载荷
+你可以向store.commit 传入额外的参数，即moutation的载荷：
+```js
+//...
+moutations:{
+  increment(state,n){
+    state.count +=n
+  }
+}
+
+store.commit('increment',10)
+```
+在大多数情况下，载荷应该是一个对象，这样可以包含多个字段并且记录的 mutation 会更易读：
+```js
+// ...
+mutations: {
+  increment (state, payload) {
+    state.count += payload.amount
+  }
+}
+
+store.commit('increment', {
+  amount: 10
+})
+
+```
+
+### 5.2、对象方式提交载荷     
+提交mution的另外一种方式就是直接使用type属性的对象
+```js
+store.commit({
+  type:'increment',
+  amount:10
+})
+```      
+### 5.3、Mutation需遵守vue的相应规则
+Vuex的store中的状态是响应式的，那么当我们变更状态时，监视状态的 Vue 组件也会自动更新。这也意味着 Vuex 中的 mutation 也需要与使用 Vue 一样遵守一些注意事项：
+1. 最好提交在你的store中初始化好所以需要的属性。
+2. 当需要在对象上添加新属性是应该使用：
+  *使用Vue.set(obj,'newProp',123)
+  *以新对象替换老对象，例如
+    ```js
+    state.obj = {
+      ...state.obj,newProp:123
+    }
+    ```
