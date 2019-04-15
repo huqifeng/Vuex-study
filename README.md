@@ -263,3 +263,35 @@ Vuex的store中的状态是响应式的，那么当我们变更状态时，监�
       ...state.obj,newProp:123
     }
     ```
+### 5.4、Mutation必须是同步函数
+Mutation必须是同步函数这是一条很重要的原则
+```js
+mutations:{
+  someMutation(state){
+    api.callAsycMethod(()=>{
+      state.coint++
+    })
+  }
+}
+```
+现在想象，我们正在 debug 一个 app 并且观察 devtool 中的 mutation 日志。每一条 mutation 被记录，devtools 都需要捕捉到前一状态和后一状态的快照。然而，在上面的例子中 mutation 中的异步函数中的回调让这不可能完成：因为当 mutation 触发的时候，回调函数还没有被调用，devtools 不知道什么时候回调函数实际上被调用——实质上任何在回调函数中进行的状态的改变都是不可追踪的。
+
+### 5.5在组件中提交Mutation
+你可以在组件中使用this.$store.commit('***')提交mution，或者是使用mapMutations辅助韩式将组件中的methods映射为store.commit调用（需要在根节点中注入store）。
+```js
+import {mapMutations} from 'vuex'
+
+export default{
+  //...
+  methods:{
+    ...mapMutations([
+      'increment',//将this.increment()映射为this.$store.commit('increment')
+      //mapMutations也支持载荷
+      'incrementBy'//将this.incrementBy(amount)映射为this.$store.commit('incrementBy',amount)
+    ]),
+    ...mapMutations({
+      add:'increment'//将this.add()映射为this.$store.commit('increment')
+    })
+  }
+}
+```
