@@ -295,3 +295,29 @@ export default{
   }
 }
 ```
+
+## 6、Action
+Action类似于mution,不同在于：
+* Action提交的是mutation,而不是借鉴变更状态。
+* Action可以包含任意异步操作。
+让我们来注册一个简单的action:
+```js
+const store = new Vuex.Store({
+  state:{
+    cont:0
+  },
+  mutations:{
+    increment(state){
+      state.count++
+    }
+  },
+  actions:{
+    increment(context){
+      context.commit('increment')
+    }
+  }
+})
+```
+Action函数接受一个与store实例具有相同方法和属性的context对象，因此你可以调用context.commit提交一个mutation,或者通过context.state和context.getters来获取state和getters。
+
+五一放假我回家
