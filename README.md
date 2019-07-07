@@ -320,4 +320,4 @@ const store = new Vuex.Store({
 ```
 Action函数接受一个与store实例具有相同方法和属性的context对象，因此你可以调用context.commit提交一个mutation,或者通过context.state和context.getters来获取state和getters。
 
-五一放假我回家
+十一回家
